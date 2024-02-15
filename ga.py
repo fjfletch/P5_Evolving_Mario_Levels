@@ -72,6 +72,7 @@ class Individual_Grid(object):
         right = width - 1
         for y in range(height):
             for x in range(left, right):
+                if genome[y][x] == "f" or genome[y][x] == "v": continue
                 rand = random.random()
 
                 if genome[y][x] == "m":
@@ -86,6 +87,18 @@ class Individual_Grid(object):
                 if genome[y][x] == "|" and y < 15:
                     genome[y+1][x] = "|"
                     continue
+                    
+                if genome[y][x] == "X" or genome[y][x] == "B":
+                    i = random.choice([-1, 1])
+                    if genome[y][x + i] == "-":
+                        if rand <= 0.02:
+                            genome[y][x + i] = "M"
+                        elif rand <= 0.05:
+                            block = random.choice(["X", "B"])
+                            genome[y][x + i] = block
+                    elif rand <= 0.01:
+                        genome[y][x] == "-"
+
         return genome
 
     # Create zero or more children from self and other
@@ -96,17 +109,17 @@ class Individual_Grid(object):
         left = 1
         right = width - 1
 
+        rand = random.random()
         probability = other.fitness() / (self.fitness() + other.fitness())
+
+        if rand >= probability:
+            return Individual_Grid(self.mutate(new_genome))
 
         for y in range(height):
             for x in range(left, right):
                 # STUDENT Which one should you take?  Self, or other?  Why?
                 # STUDENT consider putting more constraints on this to prevent pipes in the air, etc
-                
-                #rand = random.random()
-                #if rand >= probability:
-                #    if new_genome[y][x] == "T": continue
-                #   new_genome[y][x] = other.genome[y][x]
+
                 if x > right / 2:
                     new_genome[y][x] = other.genome[y][x]
 
@@ -138,11 +151,11 @@ class Individual_Grid(object):
         g = []
         for row in range(height):
             if row < 6:
-                g.append(random.choices(options, weights = [99, 0.5, 0, 0, 0.5, 0, 0, 0, 0], k=width))
-            elif row < 12:
-                g.append(random.choices(options, weights = [90, 1, 0, 0, 1, 1, 0, 0.1, 1], k=width))
+                g.append(random.choices(options, weights = [99, 0.2, 0, 0, 0.2, 0, 0, 0, 0], k=width))
+            elif row < 11:
+                g.append(random.choices(options, weights = [90, 1, 0, 0, 1, 1, 0, 0.2, 1], k=width))
             else:
-                g.append(random.choices(options, weights = [80, 5, 1, 1, 5, 3, 0, 1, 2], k=width))
+                g.append(random.choices(options, weights = [75, 1, 1, 1, 5, 3, 0, 1.5, 2], k=width))
         g[15][:] = ["X"] * width
         g[14][0] = "m"
         g[7][-1] = "v"
