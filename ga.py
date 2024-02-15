@@ -342,11 +342,29 @@ class Individual_DE(object):
 
 Individual = Individual_Grid
 
+def roulette_wheel(population):
+    # https://cratecode.com/info/roulette-wheel-selection
+    total_fitness = sum([p.fitness() for p in population])
+    probabilities = [(p.fitness() / total_fitness) for p in population]    
+    cumulative_probability  = [sum(probabilities[:i+1]) for i in range(len(population))]
+    
+    rand = random.random()
+
+    for i, p in enumerate(cumulative_probability):
+        if p >= rand:
+            return population[i]
 
 def generate_successors(population):
     results = []
     # STUDENT Design and implement this
     # Hint: Call generate_children() on some individuals and fill up results.
+
+    pop_sorted = sorted(population, key=Individual.fitness, reverse=True)
+
+    for p in pop_sorted:
+        rw_selected = roulette_wheel(population)
+        results.append(p.generate_children(rw_selected))
+
     return results
 
 
