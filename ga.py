@@ -72,7 +72,20 @@ class Individual_Grid(object):
         right = width - 1
         for y in range(height):
             for x in range(left, right):
-                pass
+                rand = random.random()
+
+                if genome[y][x] == "m":
+                    if not genome[y - 1][x] == "-":
+                        genome[y - 1][x] = "-"
+                    continue
+
+                if genome[y][x] == "T":
+                    if not genome[y+1][x] == "|":
+                        genome[y+1][x] = "|"
+                    continue
+                if genome[y][x] == "|" and y < 15:
+                    genome[y+1][x] = "|"
+                    continue
         return genome
 
     # Create zero or more children from self and other
@@ -82,18 +95,23 @@ class Individual_Grid(object):
         # do crossover with other
         left = 1
         right = width - 1
+
+        probability = other.fitness() / (self.fitness() + other.fitness())
+
         for y in range(height):
             for x in range(left, right):
                 # STUDENT Which one should you take?  Self, or other?  Why?
                 # STUDENT consider putting more constraints on this to prevent pipes in the air, etc
-                if new_genome[y][x] == "|" or new_genome[y][x] == "T":
-                    if y < 13 or not new_genome[y+1][x] == '-':
-                        new_genome[y][x] = other.genome[y][x]
-                    continue
-                if random.random() > 0.5:
+                
+                #rand = random.random()
+                #if rand >= probability:
+                #    if new_genome[y][x] == "T": continue
+                #   new_genome[y][x] = other.genome[y][x]
+                if x > right / 2:
                     new_genome[y][x] = other.genome[y][x]
+
         # do mutation; note we're returning a one-element tuple here
-        return Individual_Grid(new_genome)
+        return Individual_Grid(self.mutate(new_genome))
 
     # Turn the genome into a level string (easy for this genome)
     def to_level(self):
@@ -117,11 +135,14 @@ class Individual_Grid(object):
     def random_individual(cls):
         # STUDENT consider putting more constraints on this to prevent pipes in the air, etc
         # STUDENT also consider weighting the different tile types so it's not uniformly random
+        g = []
         for row in range(height):
-            if row > 5:    
-                g = [random.choices(options, weights = [90, 5, 1, 1, 5, 3, 5, 5, 2], k=width) for row in range(height)]
+            if row < 6:
+                g.append(random.choices(options, weights = [99, 0.5, 0, 0, 0.5, 0, 0, 0, 0], k=width))
+            elif row < 12:
+                g.append(random.choices(options, weights = [90, 1, 0, 0, 1, 1, 0, 0.1, 1], k=width))
             else:
-                g = [random.choices(options, weights = [100, 0.5, 0, 0, 1, 0, 0, 0, 0], k=width) for row in range(height)]
+                g.append(random.choices(options, weights = [80, 5, 1, 1, 5, 3, 0, 1, 2], k=width))
         g[15][:] = ["X"] * width
         g[14][0] = "m"
         g[7][-1] = "v"
