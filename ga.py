@@ -67,18 +67,12 @@ class Individual_Grid(object):
         # STUDENT implement a mutation operator, also consider not mutating this individual
         # STUDENT also consider weighting the different tile types so it's not uniformly random
         # STUDENT consider putting more constraints on this to prevent pipes in the air, etc
-
+    
         left = 1
         right = width - 1
         for y in range(height):
             for x in range(left, right):
-                if genome[y][x] == "f" or genome[y][x] == "v": continue
                 rand = random.random()
-
-                if genome[y][x] == "m":
-                    if not genome[y - 1][x] == "-":
-                        genome[y - 1][x] = "-"
-                    continue
 
                 if genome[y][x] == "T":
                     if not genome[y+1][x] == "|":
@@ -87,17 +81,17 @@ class Individual_Grid(object):
                 if genome[y][x] == "|" and y < 15:
                     genome[y+1][x] = "|"
                     continue
-                    
+
                 if genome[y][x] == "X" or genome[y][x] == "B":
                     i = random.choice([-1, 1])
-                    if genome[y][x + i] == "-":
-                        if rand <= 0.02:
-                            genome[y][x + i] = "M"
-                        elif rand <= 0.05:
-                            block = random.choice(["X", "B"])
-                            genome[y][x + i] = block
-                    elif rand <= 0.01:
-                        genome[y][x] == "-"
+                    if rand <= 0.1 and genome[y][x + i] == "-":
+                        genome[y][x + i] = random.choices(["-","X","B","M","?"],
+                                                          weights=[70, 40, 40, 5, 5], k=1)[0]
+                    continue
+
+                if genome[y][x] == "-" and y < 15:
+                    if rand <= 0.002 and genome[y + 1][x] in ["X", "B"]:
+                        genome[y][x] = random.choice(["X", "B"])
 
         return genome
 
@@ -150,16 +144,19 @@ class Individual_Grid(object):
         # STUDENT also consider weighting the different tile types so it's not uniformly random
         g = []
         for row in range(height):
-            if row < 6:
+            if row < 7:
                 g.append(random.choices(options, weights = [99, 0.2, 0, 0, 0.2, 0, 0, 0, 0], k=width))
-            elif row < 11:
-                g.append(random.choices(options, weights = [90, 1, 0, 0, 1, 1, 0, 0.2, 1], k=width))
+            elif row < 10:
+                g.append(random.choices(options, weights = [90, 1, 0, 0, 1, 1, 0, 0.15, 1], k=width))
             else:
-                g.append(random.choices(options, weights = [75, 1, 1, 1, 5, 3, 0, 1.5, 2], k=width))
+                g.append(random.choices(options, weights = [75, 1, 1, 1, 5, 3, 0, 1.5, 1.5], k=width))
         g[15][:] = ["X"] * width
         g[14][0] = "m"
+        for col in range(14):
+            g[col][0] = "-"
         g[7][-1] = "v"
-        g[8:14][-1] = ["f"] * 6
+        for col in range(8, 14):
+            g[col][-1] = "f"
         g[14:16][-1] = ["X", "X"]
         return cls(g)
 
