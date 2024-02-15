@@ -86,9 +86,14 @@ class Individual_Grid(object):
             for x in range(left, right):
                 # STUDENT Which one should you take?  Self, or other?  Why?
                 # STUDENT consider putting more constraints on this to prevent pipes in the air, etc
-                pass
+                if new_genome[y][x] == "|" or new_genome[y][x] == "T":
+                    if y < 13 or not new_genome[y+1][x] == '-':
+                        new_genome[y][x] = other.genome[y][x]
+                    continue
+                if random.random() > 0.5:
+                    new_genome[y][x] = other.genome[y][x]
         # do mutation; note we're returning a one-element tuple here
-        return (Individual_Grid(new_genome),)
+        return Individual_Grid(new_genome)
 
     # Turn the genome into a level string (easy for this genome)
     def to_level(self):
@@ -112,7 +117,11 @@ class Individual_Grid(object):
     def random_individual(cls):
         # STUDENT consider putting more constraints on this to prevent pipes in the air, etc
         # STUDENT also consider weighting the different tile types so it's not uniformly random
-        g = [random.choices(options, k=width) for row in range(height)]
+        for row in range(height):
+            if row > 5:    
+                g = [random.choices(options, weights = [90, 5, 1, 1, 5, 3, 5, 5, 2], k=width) for row in range(height)]
+            else:
+                g = [random.choices(options, weights = [100, 0.5, 0, 0, 1, 0, 0, 0, 0], k=width) for row in range(height)]
         g[15][:] = ["X"] * width
         g[14][0] = "m"
         g[7][-1] = "v"
