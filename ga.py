@@ -84,9 +84,11 @@ class Individual_Grid(object):
 
                 if genome[y][x] == "X" or genome[y][x] == "B":
                     i = random.choice([-1, 1])
-                    if rand <= 0.1 and genome[y][x + i] == "-":
+                    if rand <= 0.08 and genome[y][x + i] == "-":
                         genome[y][x + i] = random.choices(["-","X","B","M","?"],
-                                                          weights=[70, 40, 40, 5, 5], k=1)[0]
+                                                          weights=[75, 40, 40, 5, 5], k=1)[0]
+                    elif rand <= 0.005:
+                        genome[y][x] = "-"
                     continue
 
                 if genome[y][x] == "-" and y < 15:
