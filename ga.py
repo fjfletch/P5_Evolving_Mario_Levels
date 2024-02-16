@@ -211,6 +211,14 @@ class Individual_DE(object):
         # STUDENT For example, too many stairs are unaesthetic.  Let's penalize that
         if len(list(filter(lambda de: de[1] == "6_stairs", self.genome))) > 5:
             penalties -= 2
+
+        #too few holes is penalized
+        if len(list(filter(lambda de: de[1] == "0_hole", self.genome))) <= 2:
+            penalties -= 2
+        #too few platforms is penalized
+        if len(list(filter(lambda de: de[1] == "1_platform", self.genome))) <= 4:
+            penalties -= 2
+
         # STUDENT If you go for the FI-2POP extra credit, you can put constraint calculation in here too and cache it in a new entry in __slots__.
         self._fitness = sum(map(lambda m: coefficients[m] * measurements[m],
                                 coefficients)) + penalties
@@ -362,7 +370,17 @@ class Individual_DE(object):
     @classmethod
     def empty_individual(_cls):
         # STUDENT Maybe enhance this
-        g = []
+        elt_count = random.randint(8, 128)
+        g = [random.choice([
+            (random.randint(1, width - 2), "0_hole", random.randint(1, 8)),
+            (random.randint(1, width - 2), "1_platform", random.randint(1, 8), random.randint(0, height - 1), random.choice(["?", "X", "B"])),
+            (random.randint(1, width - 2), "2_enemy"),
+            (random.randint(1, width - 2), "3_coin", random.randint(0, height - 1)),
+            (random.randint(1, width - 2), "4_block", random.randint(0, height - 1), random.choice([True, False])),
+            (random.randint(1, width - 2), "5_qblock", random.randint(0, height - 1), random.choice([True, False])),
+            (random.randint(1, width - 2), "6_stairs", random.randint(1, height - 4), random.choice([-1, 1])),
+            (random.randint(1, width - 2), "7_pipe", random.randint(2, height - 4))
+        ]) for i in range(elt_count)]
         return Individual_DE(g)
 
     @classmethod
@@ -382,7 +400,7 @@ class Individual_DE(object):
         return Individual_DE(g)
 
 
-Individual = Individual_Grid
+Individual = Individual_DE
 
 def roulette_wheel(population):
     # https://cratecode.com/info/roulette-wheel-selection
@@ -405,7 +423,14 @@ def generate_successors(population):
 
     for p in pop_sorted:
         rw_selected = roulette_wheel(population)
-        results.append(p.generate_children(rw_selected))
+
+        # for DE
+        child1, child2 = p.generate_children(rw_selected)
+        results.append(child1)
+        results.append(child2)
+
+        # for grid
+        # results.append(p.generate_children(rw_selected))
 
     return results
 
@@ -446,7 +471,7 @@ def ga():
                     print("Net time:", now - start)
                     with open("levels/last.txt", 'w') as f:
                         for row in best.to_level():
-                            f.write("".join(row) + "\n")
+                            f.write("".join(row) + "-" + "\n")
                 generation += 1
                 # STUDENT Determine stopping condition
                 stop_condition = False
@@ -478,4 +503,4 @@ if __name__ == "__main__":
     for k in range(0, 10):
         with open("levels/" + now + "_" + str(k) + ".txt", 'w') as f:
             for row in final_gen[k].to_level():
-                f.write("".join(row) + "\n")
+                f.write("".join(row) + "-" + "\n")
