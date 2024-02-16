@@ -400,7 +400,7 @@ class Individual_DE(object):
         return Individual_DE(g)
 
 
-Individual = Individual_DE
+Individual = Individual_Grid
 
 def roulette_wheel(population):
     # https://cratecode.com/info/roulette-wheel-selection
@@ -424,13 +424,12 @@ def generate_successors(population):
     for p in pop_sorted:
         rw_selected = roulette_wheel(population)
 
-        # for DE
-        child1, child2 = p.generate_children(rw_selected)
-        results.append(child1)
-        results.append(child2)
-
-        # for grid
-        # results.append(p.generate_children(rw_selected))
+        if isinstance(p, Individual_Grid):
+            results.append(p.generate_children(rw_selected))
+        else:
+            child1, child2 = p.generate_children(rw_selected)
+            results.append(child1)
+            results.append(child2)
 
     return results
 
